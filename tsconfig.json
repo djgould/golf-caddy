@@ -14,7 +14,8 @@
     { "path": "./packages/logger" },
     { "path": "./packages/config" },
     { "path": "./packages/build-config" },
-    { "path": "./packages/test-config" }
+    { "path": "./packages/test-config" },
+    { "path": "./apps/mobile" }
   ],
   "include": [],
   "exclude": ["node_modules", "dist", "build", ".turbo"]

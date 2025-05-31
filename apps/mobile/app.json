@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Golf Caddy",
+    "slug": "golf-caddy",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "scheme": "golfcaddy",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.golfcaddy.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Golf Caddy needs access to your location to calculate distances to holes and track your shots.",
+        "NSLocationAlwaysUsageDescription": "Golf Caddy needs access to your location to track your round even when the app is in the background.",
+        "NSCameraUsageDescription": "Golf Caddy needs access to your camera to capture photos of the course and your shots."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.golfcaddy.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id-here"
+      }
+    }
+  }
+}
