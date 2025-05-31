@@ -1,0 +1,109 @@
+{
+  "meta": {
+    "generatedAt": "2025-05-31T17:31:57.708Z",
+    "tasksAnalyzed": 12,
+    "totalTasks": 12,
+    "analysisCount": 12,
+    "thresholdScore": 5,
+    "projectName": "Taskmaster",
+    "usedResearch": true
+  },
+  "complexityAnalysis": [
+    {
+      "taskId": 1,
+      "taskTitle": "Setup Monorepo Infrastructure",
+      "complexityScore": 8,
+      "recommendedSubtasks": 8,
+      "expansionPrompt": "Break down the monorepo setup into granular steps: initializing the repo, configuring workspace tools, setting up each base package, establishing TypeScript and linting standards, configuring build/test pipelines, and verifying cross-package integration.",
+      "reasoning": "This task involves multiple technologies (Turborepo, pnpm, TypeScript, build pipelines), cross-package coordination, and foundational architecture decisions. It requires careful configuration and validation across several layers, making it a high-complexity task that benefits from further decomposition for clarity and maintainability."
+    },
+    {
+      "taskId": 2,
+      "taskTitle": "Initialize Expo Mobile App",
+      "complexityScore": 6,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Expand the Expo app initialization into steps for project creation, dependency installation, navigation setup, core screen scaffolding, permissions configuration, and EAS build/test integration.",
+      "reasoning": "While the Expo ecosystem streamlines much of the setup, this task still covers several domains: project bootstrapping, navigation, permissions, and environment configuration. Each area can introduce integration challenges, but the overall complexity is moderate due to Expo's abstractions."
+    },
+    {
+      "taskId": 3,
+      "taskTitle": "Setup Supabase and Database Schema",
+      "complexityScore": 8,
+      "recommendedSubtasks": 8,
+      "expansionPrompt": "Decompose the database setup into Supabase provisioning, PostGIS enablement, Prisma initialization, schema design, migration management, seed data creation, RLS policy implementation, and spatial query testing.",
+      "reasoning": "This task spans cloud database provisioning, advanced spatial extensions, ORM schema design, migrations, and security policies. The need for spatial data handling and RLS adds significant complexity, warranting detailed subtasking."
+    },
+    {
+      "taskId": 4,
+      "taskTitle": "Implement Mapbox Integration",
+      "complexityScore": 7,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Break down Mapbox integration into SDK setup, authentication, map rendering, overlay/marker logic, offline tile management, performance optimization, and interactive features like tap-to-measure.",
+      "reasoning": "Integrating a third-party mapping SDK with offline support, overlays, and performance requirements is complex. Each feature (offline, overlays, gestures) introduces unique technical challenges, justifying more granular subtasks."
+    },
+    {
+      "taskId": 5,
+      "taskTitle": "Build tRPC API Server",
+      "complexityScore": 7,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Expand the API server task into Fastify/tRPC setup, context/auth middleware, router implementations for each domain, type sharing, error handling, input validation, and API documentation.",
+      "reasoning": "Building a type-safe API server with spatial queries, authentication, and robust error handling is a multi-faceted backend task. Each router and middleware layer can be complex, especially with spatial data and type sharing."
+    },
+    {
+      "taskId": 6,
+      "taskTitle": "Implement Yardage Calculation System",
+      "complexityScore": 6,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Decompose yardage calculation into utility creation, GPS tracking, UI components, map interaction, accuracy improvements, and edge case handling.",
+      "reasoning": "While the core math is well-defined, integrating real-time GPS, UI updates, and handling mobile edge cases (drift, accuracy) adds moderate complexity. Each aspect can be developed and tested independently."
+    },
+    {
+      "taskId": 7,
+      "taskTitle": "Create Shot Tracking and Round Management",
+      "complexityScore": 7,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Expand shot tracking into state management, UI/UX for logging, offline storage, background sync, round summary/statistics, and data export features.",
+      "reasoning": "This task involves persistent state management, offline/online sync, user interface, and analytics. The need for robust sync and error handling increases complexity, making detailed subtasks beneficial."
+    },
+    {
+      "taskId": 8,
+      "taskTitle": "Implement Shot Planning Visualization",
+      "complexityScore": 6,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Break down shot planning into arc calculation, gesture controls, club distance management, wind adjustment, landing zone visualization, and UI integration.",
+      "reasoning": "The visualization requires mathematical modeling, interactive UI, and integration with user data. While not as foundational as infrastructure, the combination of real-time graphics and user input is moderately complex."
+    },
+    {
+      "taskId": 9,
+      "taskTitle": "Build Offline Mode and Sync System",
+      "complexityScore": 8,
+      "recommendedSubtasks": 8,
+      "expansionPrompt": "Decompose offline mode into storage management, map tile downloads, sync queue, network monitoring, conflict resolution, UI indicators, and cleanup routines.",
+      "reasoning": "Comprehensive offline support with intelligent sync, conflict handling, and storage management is a high-complexity feature, especially for mobile apps with rich data and map assets."
+    },
+    {
+      "taskId": 10,
+      "taskTitle": "Integrate AI Shot Recommendations",
+      "complexityScore": 7,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Expand AI integration into OpenAI client setup, prompt engineering, API endpoint with caching, UI component, offline fallback logic, and user feedback collection.",
+      "reasoning": "Integrating external AI, prompt design, caching, and fallback logic introduces backend and frontend complexity, as well as reliability and UX considerations."
+    },
+    {
+      "taskId": 11,
+      "taskTitle": "Implement Performance Optimizations",
+      "complexityScore": 8,
+      "recommendedSubtasks": 8,
+      "expansionPrompt": "Break down performance optimization into GPS polling, map rendering, memory management, monitoring, React optimizations, and battery usage strategies.",
+      "reasoning": "Optimizing for battery, memory, and rendering performance in a real-time mobile app is a high-complexity, cross-cutting concern that requires specialized techniques and thorough testing."
+    },
+    {
+      "taskId": 12,
+      "taskTitle": "Setup CI/CD and Deployment Pipeline",
+      "complexityScore": 6,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Expand CI/CD setup into GitHub Actions for test/build, EAS build configuration, Vercel deployment, release automation, and environment management.",
+      "reasoning": "While modern tools simplify CI/CD, coordinating multiple deployment targets (mobile, API), environment variables, and automation workflows still requires careful setup and validation."
+    }
+  ]
+}

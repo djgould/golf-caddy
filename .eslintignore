@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Cache
+.turbo/
+.cache/
+
+# Test coverage
+coverage/
+
+# Generated files
+*.generated.ts
+*.generated.js
+
+# Config files
+*.config.js
+*.config.ts
+
+# Environment
+.env*
+
+# Prisma
+packages/db/prisma/migrations/ 

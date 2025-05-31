@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": ".tsbuildinfo"
+  },
+  "references": [
+    { "path": "./packages/ui" },
+    { "path": "./packages/utils" },
+    { "path": "./packages/db" },
+    { "path": "./packages/trpc" },
+    { "path": "./packages/ai" },
+    { "path": "./packages/offline" },
+    { "path": "./packages/logger" },
+    { "path": "./packages/config" },
+    { "path": "./packages/build-config" },
+    { "path": "./packages/test-config" }
+  ],
+  "include": [],
+  "exclude": ["node_modules", "dist", "build", ".turbo"]
+}

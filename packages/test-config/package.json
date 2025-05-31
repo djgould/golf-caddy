@@ -1,0 +1,47 @@
+{
+  "name": "@repo/test-config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared test configuration and utilities for Golf Caddy monorepo",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./vitest": {
+      "import": "./dist/vitest.mjs",
+      "require": "./dist/vitest.js",
+      "types": "./dist/vitest.d.ts"
+    },
+    "./react-native": {
+      "import": "./dist/react-native.mjs",
+      "require": "./dist/react-native.js",
+      "types": "./dist/react-native.d.ts"
+    },
+    "./setup": {
+      "import": "./dist/setup.mjs",
+      "require": "./dist/setup.js",
+      "types": "./dist/setup.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint . --ext .ts",
+    "clean": "rm -rf dist node_modules .turbo"
+  },
+  "dependencies": {
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/react-native": "^13.2.0",
+    "vitest": "^3.1.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.3"
+  }
+} 
