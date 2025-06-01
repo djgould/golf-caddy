@@ -15,11 +15,12 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.golfcaddy.app",
+      "bundleIdentifier": "com.devinggolfcaddy.app",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Golf Caddy needs access to your location to calculate distances to holes and track your shots.",
         "NSLocationAlwaysUsageDescription": "Golf Caddy needs access to your location to track your round even when the app is in the background.",
-        "NSCameraUsageDescription": "Golf Caddy needs access to your camera to capture photos of the course and your shots."
+        "NSCameraUsageDescription": "Golf Caddy needs access to your camera to capture photos of the course and your shots.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -28,7 +29,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.golfcaddy.app",
+      "package": "com.devinggolfcaddy.app",
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -41,12 +42,20 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsDownloadToken": "sk.eyJ1IjoiZGpnb3VsZDA2MjgiLCJhIjoiY21iY3p0aTd5MTRpZTJub2x3dncyZzU0MSJ9.Rc0KVYGkCKlsKL6xDvxkiQ"
+        }
+      ]
     ],
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": "your-project-id-here"
+        "projectId": "537b3673-877b-43a3-b70c-ff01efd0201e"
       }
-    }
+    },
+    "owner": "djgould"
   }
 }

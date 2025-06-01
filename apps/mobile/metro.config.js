@@ -1,3 +1,7 @@
+const {
+  withNativeWind: withNativeWind
+} = require("nativewind/metro");
+
 const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
 
@@ -19,4 +23,6 @@ config.resolver.nodeModulesPaths = [
 // 3. Force Metro to resolve (and watch) files from the monorepo
 config.resolver.disableHierarchicalLookup = true;
 
-module.exports = config; 
+module.exports = withNativeWind(config, {
+  input: "./global.css"
+});

@@ -2,19 +2,123 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
 }
 
-// Placeholder model - will be updated with actual models later
+// User model for authentication and profile
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  handicap     Float?
+  profileImage String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  rounds Round[]
+  shots  Shot[]
+
+  @@map("users")
+}
+
+// Golf course information
+model Course {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  location    Json // PostGIS Point type stored as JSON
+  bounds      Json? // PostGIS Polygon for course boundaries
+  address     String?
+  city        String?
+  state       String?
+  country     String?
+  phone       String?
+  website     String?
+  rating      Float? // Course rating
+  slope       Int? // Slope rating
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  holes  Hole[]
+  rounds Round[]
+
+  @@index([name])
+  @@map("courses")
+}
+
+// Individual hole information
+model Hole {
+  id            String  @id @default(cuid())
+  courseId      String
+  holeNumber    Int
+  par           Int
+  yardage       Int // From regular tees
+  handicap      Int? // Hole difficulty ranking 1-18
+  teeLocation   Json // PostGIS Point for tee box
+  greenLocation Json // PostGIS Point for green center
+  description   String?
+
+  // Relations
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  shots  Shot[]
+
+  @@unique([courseId, holeNumber])
+  @@map("holes")
+}
+
+// Round of golf
+model Round {
+  id            String    @id @default(cuid())
+  userId        String
+  courseId      String
+  startTime     DateTime  @default(now())
+  endTime       DateTime?
+  weather       String?
+  temperature   Int? // In Fahrenheit
+  windSpeed     Int? // In mph
+  windDirection String?
+  score         Int? // Total score
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id])
+  shots  Shot[]
+
+  @@index([userId, startTime])
+  @@map("rounds")
+}
+
+// Individual shot tracking
+model Shot {
+  id            String   @id @default(cuid())
+  roundId       String
+  userId        String
+  holeId        String
+  shotNumber    Int // Shot number on this hole
+  club          String // Club used
+  distance      Float? // Distance in yards
+  startLocation Json // PostGIS Point where shot was taken
+  endLocation   Json? // PostGIS Point where ball landed
+  result        String? // fairway, rough, bunker, water, green, etc.
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  // Relations
+  round Round @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hole  Hole  @relation(fields: [holeId], references: [id])
+
+  @@index([roundId, holeId, shotNumber])
+  @@map("shots")
 }

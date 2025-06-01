@@ -2,13 +2,11 @@ import gluestackPlugin from '@gluestack-ui/nativewind-utils/tailwind-plugin';
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: process.env.DARK_MODE ? process.env.DARK_MODE : 'media',
+  darkMode: "media",
   content: [
-    './src/**/*.{html,js,jsx,ts,tsx}',
-    './src/core-components/**/**/*.{html,js,jsx,ts,tsx}',
-    './src/components/**/*.{html,js,jsx,ts,tsx,mdx}',
-    './src/hooks/**/*.{html,js,jsx,ts,tsx,mdx}',
-    './app/**/*.{html,js,jsx,ts,tsx}',
+    "src/**/*.{tsx,jsx,ts,js}",
+    "app/**/*.{tsx,jsx,ts,js}",
+    "components/**/*.{tsx,jsx,ts,js}"
   ],
   presets: [require('nativewind/preset')],
   safelist: [
@@ -20,20 +18,6 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Golf Caddy brand color (#10b981 - emerald-500)
-        brand: {
-          50: '#ecfdf5',
-          100: '#d1fae5',
-          200: '#a7f3d0',
-          300: '#6ee7b7',
-          400: '#34d399',
-          500: '#10b981',
-          600: '#059669',
-          700: '#047857',
-          800: '#065f46',
-          900: '#064e3b',
-          950: '#022c22',
-        },
         primary: {
           0: 'rgb(var(--color-primary-0)/<alpha-value>)',
           50: 'rgb(var(--color-primary-50)/<alpha-value>)',
@@ -193,6 +177,7 @@ module.exports = {
         heading: undefined,
         body: undefined,
         mono: undefined,
+        roboto: ['Roboto', 'sans-serif'],
       },
       fontWeight: {
         extrablack: '950',
@@ -214,4 +199,4 @@ module.exports = {
     },
   },
   plugins: [gluestackPlugin],
-}; 
+};

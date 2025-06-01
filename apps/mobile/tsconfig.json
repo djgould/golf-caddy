@@ -7,13 +7,22 @@
     ],
     "types": [
       "react-native"
-    ]
+    ],
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "tailwind.config": [
+        "./tailwind.config.js"
+      ]
+    }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     "**/*.js",
-    "**/*.jsx"
+    "**/*.jsx",
+    "nativewind-env.d.ts"
   ],
   "exclude": [
     "node_modules",
