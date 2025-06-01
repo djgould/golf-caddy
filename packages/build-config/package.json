@@ -2,7 +2,7 @@
   "name": "@repo/build-config",
   "version": "0.0.0",
   "private": true,
-  "description": "Shared build configuration for Golf Caddy monorepo",
+  "description": "Shared build configurations and tools for Golf Caddy",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -16,25 +16,21 @@
       "import": "./dist/metro.mjs",
       "require": "./dist/metro.js",
       "types": "./dist/metro.d.ts"
-    },
-    "./tsup": {
-      "import": "./dist/tsup.mjs",
-      "require": "./dist/tsup.js",
-      "types": "./dist/tsup.d.ts"
     }
   },
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "lint": "eslint . --ext .ts",
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "lint": "eslint .",
     "clean": "rm -rf dist node_modules .turbo"
   },
   "dependencies": {
-    "tsup": "^8.0.0",
-    "esbuild": "^0.19.0"
+    "@expo/metro-config": "^0.18.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "typescript": "^5.3.3"
+    "@repo/eslint-config": "workspace:^",
+    "@types/node": "^20.10.0",
+    "typescript": "~5.8.3",
+    "vite": "^5.0.0"
   }
 } 

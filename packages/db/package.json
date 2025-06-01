@@ -12,16 +12,16 @@
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./client": {
-      "import": "./dist/client.mjs",
-      "require": "./dist/client.js",
-      "types": "./dist/client.d.ts"
+    "./spatial-helpers": {
+      "import": "./dist/spatial-helpers.mjs",
+      "require": "./dist/spatial-helpers.js",
+      "types": "./dist/spatial-helpers.d.ts"
     }
   },
   "scripts": {
-    "build": "tsup",
+    "build": "vite build",
+    "dev": "vite build --watch",
     "postbuild": "prisma generate || true",
-    "dev": "tsup --watch",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
@@ -39,8 +39,9 @@
   "devDependencies": {
     "@types/node": "^22.15.29",
     "prisma": "^5.22.0",
-    "tsup": "^8.0.0",
     "tsx": "^4.19.4",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vite": "^5.0.0",
+    "vite-plugin-dts": "^4.0.0"
   }
 }

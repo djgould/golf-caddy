@@ -4,8 +4,8 @@
   "private": true,
   "description": "Golf Caddy Monorepo",
   "scripts": {
-    "build": "turbo build",
-    "dev": "turbo dev",
+    "build": "turbo build --filter=!@repo/mobile",
+    "dev": "turbo dev --filter=!@repo/mobile --concurrency=12",
     "lint": "turbo lint",
     "test": "turbo test",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",

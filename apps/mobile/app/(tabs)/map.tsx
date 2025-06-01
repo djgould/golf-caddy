@@ -1,35 +1,62 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { StyleSheet, Alert } from 'react-native';
-import { Box, Text, VStack, HStack, Button, Spinner } from '@gluestack-ui/themed';
+import { Box, Text, VStack, HStack, Button } from '@gluestack-ui/themed';
 import MapboxGL, { MapStyles, DEFAULT_CAMERA_SETTINGS, ZOOM_LEVELS } from '../../src/config/mapbox';
 import { requestLocationPermission, checkLocationPermission } from '../../src/utils/permissions';
 import { useUserPreferencesStore } from '../../src/stores';
-
-// Mock course data until we integrate with the database
-const PEBBLE_BEACH_COURSE = {
-  id: '1',
-  name: 'Pebble Beach Golf Links',
-  location: {
-    coordinates: [-121.9508, 36.5686],
-  },
-  bounds: [
-    [-121.955, 36.565],
-    [-121.946, 36.572],
-  ],
-};
+import {
+  HoleMarkers,
+  CourseBoundary,
+  OfflineDownloadButton,
+  MapPerformanceOverlay,
+} from '../../src/components/golf';
+import { getCourseWithHoles } from '../../src/services/mockCourseData';
+import { LoadingSpinner } from '../../components/ui/animations';
+import { createGestureDebouncer, useGestureOptimization } from '../../src/utils/mapPerformance';
+import type { CourseWithHoles } from '../../src/types/golf';
 
 export default function MapScreen() {
   const [hasPermission, setHasPermission] = useState(false);
   const [isMapReady, setIsMapReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentZoom, setCurrentZoom] = useState<number>(ZOOM_LEVELS.OVERVIEW);
+  const [courseData, setCourseData] = useState<CourseWithHoles | null>(null);
+  const [isLoadingCourse, setIsLoadingCourse] = useState(true);
+  const [showOfflineModal, setShowOfflineModal] = useState(false);
+  const [viewBounds, setViewBounds] = useState<
+    { sw: [number, number]; ne: [number, number] } | undefined
+  >();
   const { distanceUnit } = useUserPreferencesStore();
+  const { isGesturing, handleGestureStart, handleGestureEnd } = useGestureOptimization();
 
   const cameraRef = useRef<MapboxGL.Camera>(null);
   const mapRef = useRef<MapboxGL.MapView>(null);
 
+  // Create debounced region change handler
+  const debouncedRegionChange = useRef(
+    createGestureDebouncer((feature: any) => {
+      if (feature?.properties?.zoomLevel) {
+        setCurrentZoom(feature.properties.zoomLevel);
+      }
+
+      // Update view bounds for frustum culling
+      if (feature?.geometry?.coordinates && feature?.properties?.visibleBounds) {
+        const bounds = feature.properties.visibleBounds;
+        if (bounds && bounds.length >= 4) {
+          setViewBounds({
+            sw: [bounds[0], bounds[1]], // Southwest corner
+            ne: [bounds[2], bounds[3]], // Northeast corner
+          });
+        }
+      }
+
+      handleGestureEnd();
+    }, 150)
+  ).current;
+
   useEffect(() => {
     checkPermissions();
+    loadCourseData();
   }, []);
 
   const checkPermissions = async () => {
@@ -56,62 +83,83 @@ export default function MapScreen() {
     }
   };
 
+  const loadCourseData = async () => {
+    try {
+      setIsLoadingCourse(true);
+      const course = await getCourseWithHoles('1'); // Load default course
+      setCourseData(course);
+    } catch (error) {
+      console.error('Failed to load course data:', error);
+      Alert.alert(
+        'Course Loading Error',
+        'Failed to load course information. Some features may not be available.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setIsLoadingCourse(false);
+    }
+  };
+
   const handleMapReady = () => {
     setIsMapReady(true);
+    console.log('Map is ready');
   };
 
-  const handleZoomIn = () => {
-    const newZoom = Math.min(currentZoom + 1, ZOOM_LEVELS.DETAIL_VIEW);
-    setCurrentZoom(newZoom);
-    cameraRef.current?.setCamera({
-      zoomLevel: newZoom,
-      animationDuration: 300,
-    });
+  const zoomToCourse = () => {
+    if (cameraRef.current && courseData) {
+      cameraRef.current.setCamera({
+        centerCoordinate: courseData.location.coordinates,
+        zoomLevel: ZOOM_LEVELS.OVERVIEW,
+        animationDuration: 1000,
+      });
+    }
   };
 
-  const handleZoomOut = () => {
-    const newZoom = Math.max(currentZoom - 1, 10); // Minimum zoom level
-    setCurrentZoom(newZoom);
-    cameraRef.current?.setCamera({
-      zoomLevel: newZoom,
-      animationDuration: 300,
-    });
+  const zoomToHoles = () => {
+    if (cameraRef.current) {
+      cameraRef.current.setCamera({
+        zoomLevel: ZOOM_LEVELS.HOLE_VIEW,
+        animationDuration: 1000,
+      });
+    }
   };
 
-  const handleRecenterMap = () => {
-    cameraRef.current?.setCamera({
-      centerCoordinate: PEBBLE_BEACH_COURSE.location.coordinates,
-      zoomLevel: ZOOM_LEVELS.OVERVIEW,
-      animationDuration: 1000,
-    });
-    setCurrentZoom(ZOOM_LEVELS.OVERVIEW);
-  };
+  const handleRegionWillChange = useCallback(() => {
+    handleGestureStart();
+  }, [handleGestureStart]);
 
-  if (isLoading) {
+  const handleRegionDidChange = useCallback(
+    (feature: any) => {
+      debouncedRegionChange(feature);
+    },
+    [debouncedRegionChange]
+  );
+
+  if (isLoading || isLoadingCourse) {
     return (
       <Box className="flex-1 justify-center items-center bg-gray-100">
-        <VStack className="items-center gap-4">
-          <Spinner size="large" />
-          <Text className="text-gray-600">Loading map...</Text>
-        </VStack>
+        <LoadingSpinner size={60} />
+        <Text className="text-gray-600 mt-4">Loading map...</Text>
+      </Box>
+    );
+  }
+
+  if (!courseData) {
+    return (
+      <Box className="flex-1 justify-center items-center bg-gray-100">
+        <Text className="text-gray-600 text-center">
+          Failed to load course data.{'\n'}Please try again later.
+        </Text>
+        <Button onPress={loadCourseData} className="mt-4">
+          <Text>Retry</Text>
+        </Button>
       </Box>
     );
   }
 
   return (
-    <Box className="flex-1 bg-gray-100">
-      {/* Header */}
-      <Box className="bg-white px-4 py-3 border-b border-gray-200">
-        <VStack className="gap-1">
-          <Text className="text-xl font-bold text-gray-900">{PEBBLE_BEACH_COURSE.name}</Text>
-          <HStack className="items-center gap-2">
-            <Text className="text-sm text-gray-600">Distance Unit:</Text>
-            <Text className="text-sm font-medium text-gray-900">{distanceUnit}</Text>
-          </HStack>
-        </VStack>
-      </Box>
-
-      {/* Map */}
+    <Box className="flex-1">
+      {/* Map Container */}
       <Box className="flex-1">
         <MapboxGL.MapView
           ref={mapRef}
@@ -124,16 +172,13 @@ export default function MapScreen() {
           scaleBarEnabled={true}
           attributionEnabled={false}
           logoEnabled={false}
-          onRegionDidChange={(feature) => {
-            if (feature?.properties?.zoomLevel) {
-              setCurrentZoom(feature.properties.zoomLevel);
-            }
-          }}
+          onRegionWillChange={handleRegionWillChange}
+          onRegionDidChange={handleRegionDidChange}
         >
           {/* Camera */}
           <MapboxGL.Camera
             ref={cameraRef}
-            centerCoordinate={PEBBLE_BEACH_COURSE.location.coordinates}
+            centerCoordinate={courseData.location.coordinates}
             zoomLevel={ZOOM_LEVELS.OVERVIEW}
             animationMode={DEFAULT_CAMERA_SETTINGS.animationMode}
             animationDuration={DEFAULT_CAMERA_SETTINGS.animationDuration}
@@ -144,49 +189,84 @@ export default function MapScreen() {
             <MapboxGL.UserLocation visible={true} showsUserHeadingIndicator={true} />
           )}
 
-          {/* Course center marker (temporary) */}
-          <MapboxGL.PointAnnotation
-            id="course-center"
-            coordinate={PEBBLE_BEACH_COURSE.location.coordinates}
-          >
-            <Box className="bg-green-600 rounded-full p-2 border-2 border-white">
-              <Text className="text-white text-xs font-bold">PB</Text>
-            </Box>
-          </MapboxGL.PointAnnotation>
+          {/* Course Boundary */}
+          <CourseBoundary course={courseData} />
+
+          {/* Enhanced Hole Markers with Performance Optimizations */}
+          {(() => {
+            const holeMarkersProps: any = {
+              holes: courseData.holes,
+              currentZoom: currentZoom,
+              enableClustering: true,
+              showInfo: currentZoom >= ZOOM_LEVELS.HOLE_VIEW,
+            };
+
+            if (viewBounds) {
+              holeMarkersProps.viewBounds = viewBounds;
+            }
+
+            return <HoleMarkers {...holeMarkersProps} />;
+          })()}
         </MapboxGL.MapView>
       </Box>
 
-      {/* Map Controls Overlay */}
-      {isMapReady && (
-        <Box className="absolute bottom-8 right-4">
-          <VStack className="gap-2">
-            <Button className="bg-white rounded-full shadow-lg w-12 h-12" onPress={handleZoomIn}>
-              <Text className="text-gray-900 text-lg font-bold">+</Text>
-            </Button>
-            <Button className="bg-white rounded-full shadow-lg w-12 h-12" onPress={handleZoomOut}>
-              <Text className="text-gray-900 text-lg font-bold">−</Text>
-            </Button>
-            <Button
-              className="bg-white rounded-full shadow-lg w-12 h-12"
-              onPress={handleRecenterMap}
-            >
-              <Text className="text-gray-900 text-lg">📍</Text>
-            </Button>
-          </VStack>
-        </Box>
-      )}
-
-      {/* Loading overlay */}
-      {!isMapReady && (
-        <Box className="absolute inset-0 bg-black/20 justify-center items-center">
-          <Box className="bg-white rounded-lg p-4">
-            <VStack className="items-center gap-2">
-              <Spinner size="small" />
-              <Text className="text-gray-600">Loading satellite imagery...</Text>
+      {/* Map Header Overlay */}
+      <Box className="absolute top-0 left-0 right-0 bg-white/95 backdrop-blur border-b border-gray-200 p-4">
+        <VStack className="gap-2">
+          <HStack className="justify-between items-center">
+            <VStack className="flex-1">
+              <Text className="text-lg font-bold text-gray-900">{courseData.name}</Text>
+              <Text className="text-sm text-gray-600">
+                {courseData.holes.length} holes • Rating: {courseData.rating || 'N/A'}
+              </Text>
             </VStack>
-          </Box>
-        </Box>
-      )}
+
+            <Button
+              onPress={() => setShowOfflineModal(!showOfflineModal)}
+              className="bg-blue-500 px-3 py-2"
+            >
+              <Text className="text-white text-xs">Offline</Text>
+            </Button>
+          </HStack>
+
+          {/* Offline Download Panel */}
+          {showOfflineModal && (
+            <Box className="mt-2 p-3 bg-white rounded-lg border border-gray-200 shadow-sm">
+              <OfflineDownloadButton course={courseData} compact={false} showProgress={true} />
+            </Box>
+          )}
+        </VStack>
+      </Box>
+
+      {/* Map Controls Overlay */}
+      <Box className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-200 p-4">
+        <HStack className="justify-between items-center">
+          <VStack className="gap-1">
+            <Text className="text-xs text-gray-500">Zoom Level</Text>
+            <Text className="text-sm font-medium">{currentZoom.toFixed(1)}x</Text>
+          </VStack>
+
+          <HStack className="gap-2">
+            <Button onPress={zoomToCourse} className="bg-gray-500 px-3 py-2">
+              <Text className="text-white text-xs">Course</Text>
+            </Button>
+
+            <Button onPress={zoomToHoles} className="bg-green-500 px-3 py-2">
+              <Text className="text-white text-xs">Holes</Text>
+            </Button>
+          </HStack>
+
+          <VStack className="gap-1 items-end">
+            <Text className="text-xs text-gray-500">Distance Units</Text>
+            <Text className="text-sm font-medium">
+              {distanceUnit === 'meters' ? 'Meters' : 'Yards'}
+            </Text>
+          </VStack>
+        </HStack>
+      </Box>
+
+      {/* Performance Monitoring Overlay (Development only) */}
+      <MapPerformanceOverlay enabled={__DEV__} />
     </Box>
   );
 }

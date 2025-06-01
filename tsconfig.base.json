@@ -20,6 +20,7 @@
 
     /* Module Resolution */
     "resolveJsonModule": true,
+    "resolvePackageJsonExports": true,
     "allowJs": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -31,32 +32,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "removeComments": false,
-    "preserveConstEnums": true,
-
-    /* Path Aliases */
-    "baseUrl": ".",
-    "paths": {
-      "@repo/ui": ["./packages/ui/src"],
-      "@repo/ui/*": ["./packages/ui/src/*"],
-      "@repo/utils": ["./packages/utils/src"],
-      "@repo/utils/*": ["./packages/utils/src/*"],
-      "@repo/db": ["./packages/db/src"],
-      "@repo/db/*": ["./packages/db/src/*"],
-      "@repo/trpc": ["./packages/trpc/src"],
-      "@repo/trpc/*": ["./packages/trpc/src/*"],
-      "@repo/ai": ["./packages/ai/src"],
-      "@repo/ai/*": ["./packages/ai/src/*"],
-      "@repo/offline": ["./packages/offline/src"],
-      "@repo/offline/*": ["./packages/offline/src/*"],
-      "@repo/logger": ["./packages/logger/src"],
-      "@repo/logger/*": ["./packages/logger/src/*"],
-      "@repo/config": ["./packages/config/src"],
-      "@repo/config/*": ["./packages/config/src/*"],
-      "@repo/build-config": ["./packages/build-config/src"],
-      "@repo/build-config/*": ["./packages/build-config/src/*"],
-      "@repo/test-config": ["./packages/test-config/src"],
-      "@repo/test-config/*": ["./packages/test-config/src/*"]
-    }
+    "preserveConstEnums": true
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules", "dist", "build", ".turbo", ".next", "coverage"]

@@ -1,4 +1,4 @@
-import { prisma } from './index';
+import type { PrismaClient } from '@prisma/client';
 
 /**
  * Convert JSON point to PostGIS geography
@@ -21,11 +21,13 @@ export function makePoint(lng: number, lat: number): string {
 
 /**
  * Calculate distance between two courses
+ * @param prisma PrismaClient instance
  * @param courseId1 First course ID
  * @param courseId2 Second course ID
  * @returns Distance in miles
  */
 export async function getDistanceBetweenCourses(
+  prisma: PrismaClient,
   courseId1: string,
   courseId2: string
 ): Promise<number> {
@@ -44,12 +46,18 @@ export async function getDistanceBetweenCourses(
 
 /**
  * Find courses within a radius of a point
+ * @param prisma PrismaClient instance
  * @param lat Latitude
  * @param lng Longitude
  * @param radiusMiles Radius in miles
  * @returns Array of courses with distances
  */
-export async function findCoursesNearLocation(lat: number, lng: number, radiusMiles: number) {
+export async function findCoursesNearLocation(
+  prisma: PrismaClient,
+  lat: number,
+  lng: number,
+  radiusMiles: number
+) {
   const radiusMeters = radiusMiles * 1609.34;
 
   return await prisma.$queryRaw`
@@ -74,10 +82,11 @@ export async function findCoursesNearLocation(lat: number, lng: number, radiusMi
 
 /**
  * Calculate shot distance from start to end location
+ * @param prisma PrismaClient instance
  * @param shotId Shot ID
  * @returns Distance in yards
  */
-export async function calculateShotDistance(shotId: string): Promise<number> {
+export async function calculateShotDistance(prisma: PrismaClient, shotId: string): Promise<number> {
   const result = (await prisma.$queryRaw`
     SELECT 
       ST_Distance(
@@ -93,10 +102,11 @@ export async function calculateShotDistance(shotId: string): Promise<number> {
 
 /**
  * Get bearing (azimuth) from tee to green
+ * @param prisma PrismaClient instance
  * @param holeId Hole ID
  * @returns Bearing in degrees (0-360)
  */
-export async function getHoleBearing(holeId: string): Promise<number> {
+export async function getHoleBearing(prisma: PrismaClient, holeId: string): Promise<number> {
   const result = (await prisma.$queryRaw`
     SELECT 
       degrees(
@@ -114,12 +124,14 @@ export async function getHoleBearing(holeId: string): Promise<number> {
 
 /**
  * Check if a point is within course bounds
+ * @param prisma PrismaClient instance
  * @param courseId Course ID
  * @param lat Latitude
  * @param lng Longitude
  * @returns Boolean indicating if point is within bounds
  */
 export async function isPointInCourseBounds(
+  prisma: PrismaClient,
   courseId: string,
   lat: number,
   lng: number
@@ -139,12 +151,18 @@ export async function isPointInCourseBounds(
 
 /**
  * Find nearest holes to a location
+ * @param prisma PrismaClient instance
  * @param lat Latitude
  * @param lng Longitude
  * @param limit Number of holes to return
  * @returns Array of nearest holes with distances
  */
-export async function findNearestHoles(lat: number, lng: number, limit: number = 5) {
+export async function findNearestHoles(
+  prisma: PrismaClient,
+  lat: number,
+  lng: number,
+  limit: number = 5
+) {
   return await prisma.$queryRaw`
     SELECT 
       h.id,
@@ -165,10 +183,14 @@ export async function findNearestHoles(lat: number, lng: number, limit: number =
 
 /**
  * Calculate total distance walked in a round
+ * @param prisma PrismaClient instance
  * @param roundId Round ID
  * @returns Total distance in miles
  */
-export async function calculateRoundWalkingDistance(roundId: string): Promise<number> {
+export async function calculateRoundWalkingDistance(
+  prisma: PrismaClient,
+  roundId: string
+): Promise<number> {
   const result = (await prisma.$queryRaw`
     WITH shot_sequence AS (
       SELECT 

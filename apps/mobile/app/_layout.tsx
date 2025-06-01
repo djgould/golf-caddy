@@ -5,6 +5,7 @@ import { GluestackUIProvider } from '../components/ui/gluestack-ui-provider';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ErrorBoundary } from '../components/ui/error';
+import { TRPCProvider, TRPCErrorBoundary } from '../src/hooks/api';
 import { globalErrorHandler } from '../src/services/error';
 import { useEffect } from 'react';
 
@@ -20,22 +21,26 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <GluestackUIProvider mode="light">
-          <SafeAreaProvider>
-            <StatusBar style="auto" />
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="(auth)/login"
-                options={{
-                  title: 'Login',
-                  presentation: 'modal',
-                }}
-              />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-          </SafeAreaProvider>
-        </GluestackUIProvider>
+        <TRPCErrorBoundary>
+          <TRPCProvider>
+            <GluestackUIProvider mode="light">
+              <SafeAreaProvider>
+                <StatusBar style="auto" />
+                <Stack>
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="(auth)/login"
+                    options={{
+                      title: 'Login',
+                      presentation: 'modal',
+                    }}
+                  />
+                  <Stack.Screen name="+not-found" />
+                </Stack>
+              </SafeAreaProvider>
+            </GluestackUIProvider>
+          </TRPCProvider>
+        </TRPCErrorBoundary>
       </GestureHandlerRootView>
     </ErrorBoundary>
   );

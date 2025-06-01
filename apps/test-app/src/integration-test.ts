@@ -3,7 +3,7 @@ import { createLogger, logInfo, logError } from '@repo/logger';
 import { formatDate, getRelativeTime, formatDuration } from '@repo/utils';
 import { ConfigLoader, AppConfigSchema, type AppConfig } from '@repo/config';
 // import { prismaClient } from '@repo/db'; // Not yet exported
-import { createTsupConfig } from '@repo/build-config/tsup';
+import { getBuildOptions, type BuildEnvironment } from '@repo/build-config';
 import { createTestUser, userFixtures } from '@repo/test-config';
 
 // Test 1: Logger functionality
@@ -53,14 +53,8 @@ try {
 
 // Test 4: Build config
 console.log('\n=== Testing @repo/build-config ===');
-const buildConfig = createTsupConfig({
-  entry: ['src/index.ts'],
-  env: 'development',
-});
-console.log('Build config created:', {
-  format: buildConfig.format,
-  target: buildConfig.target,
-});
+const buildOptions = getBuildOptions('development' as BuildEnvironment);
+console.log('Build options for development:', buildOptions);
 
 // Test 5: Test utilities
 console.log('\n=== Testing @repo/test-config ===');
