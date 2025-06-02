@@ -53,4 +53,5 @@ pnpm-lock.yaml
 *.tsbuildinfo
 
 # OS files
-Thumbs.db 
+Thumbs.db
+.cursor/mcp.json
