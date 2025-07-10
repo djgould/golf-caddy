@@ -21,9 +21,16 @@ export const TestApp: React.FC = () => {
         variant="primary"
         onPress={handlePress}
         style={{ marginBottom: 10 }}
+        textStyle={{}}
       />
 
-      <Button title="Secondary Button" variant="secondary" onPress={handlePress} />
+      <Button 
+        title="Secondary Button" 
+        variant="secondary" 
+        onPress={handlePress} 
+        style={{}}
+        textStyle={{}}
+      />
 
       <Text style={{ marginTop: 20, color: '#666' }}>This app successfully imports from:</Text>
       <Text style={{ color: '#666' }}>• @repo/ui (v{UIVersion})</Text>

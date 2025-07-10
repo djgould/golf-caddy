@@ -6,7 +6,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { createTRPCClientConfig } from '../../config/trpc';
+import { createTRPCClientConfig, type CourseSearchInput, type CourseSearchOutput, type CourseByIdOutput } from '../../config/trpc';
 
 // Create a singleton tRPC client for use across hooks
 let trpcClient: ReturnType<typeof createTRPCClientConfig> | null = null;
@@ -21,12 +21,21 @@ function getTRPCClient() {
 /**
  * Hook to fetch all courses with optional filtering
  */
-export function useCourses(filters?: { state?: string; city?: string; name?: string }) {
-  return useQuery({
+export function useCourses(filters?: Partial<CourseSearchInput>) {
+  return useQuery<CourseSearchOutput>({
     queryKey: ['courses', filters],
     queryFn: async () => {
-      const client = getTRPCClient();
-      return (client as any).course.getCourses.query(filters);
+      try {
+        const client = getTRPCClient();
+        console.log('🔍 Fetching courses with filters:', filters);
+        const result = await client.course.search.query(filters || {});
+        console.log('✅ Courses fetched successfully:', result.courses.length, 'courses');
+        console.log('📋 Sample course ID:', result.courses[0]?.id);
+        return result;
+      } catch (error) {
+        console.error('❌ Failed to fetch courses:', error);
+        throw error;
+      }
     },
     staleTime: 10 * 60 * 1000, // 10 minutes - courses don't change often
     gcTime: 30 * 60 * 1000, // 30 minutes
@@ -38,11 +47,11 @@ export function useCourses(filters?: { state?: string; city?: string; name?: str
  * Hook to fetch a specific course by ID
  */
 export function useCourse(courseId: string) {
-  return useQuery({
+  return useQuery<CourseByIdOutput>({
     queryKey: ['course', courseId],
     queryFn: async () => {
       const client = getTRPCClient();
-      return (client as any).course.getById.query({ id: courseId });
+      return client.course.getById.query({ id: courseId });
     },
     enabled: !!courseId, // Only run if courseId is provided
     staleTime: 15 * 60 * 1000, // 15 minutes
@@ -54,14 +63,15 @@ export function useCourse(courseId: string) {
 /**
  * Hook to search courses by location
  */
-export function useCoursesNearby(location: { lat: number; lng: number; radiusKm?: number }) {
+export function useCoursesNearby(location: { lat: number; lng: number; radiusMiles?: number }) {
   return useQuery({
     queryKey: ['courses', 'nearby', location],
     queryFn: async () => {
       const client = getTRPCClient();
-      return (client as any).course.getCourses.query({
-        nearLocation: location,
-        radiusKm: location.radiusKm || 50, // Default 50km radius
+      return client.course.findNearby.query({
+        lat: location.lat,
+        lng: location.lng,
+        radiusMiles: location.radiusMiles || 25, // Default 25 mile radius
       });
     },
     enabled: !!(location.lat && location.lng),
@@ -72,14 +82,15 @@ export function useCoursesNearby(location: { lat: number; lng: number; radiusKm?
 }
 
 /**
- * Hook to get course holes and layout
+ * Hook to get course holes (included in getById)
  */
 export function useCourseHoles(courseId: string) {
   return useQuery({
     queryKey: ['course', courseId, 'holes'],
     queryFn: async () => {
       const client = getTRPCClient();
-      return (client as any).course.getHoles.query({ courseId });
+      const course = await client.course.getById.query({ id: courseId });
+      return course.holes;
     },
     enabled: !!courseId,
     staleTime: 30 * 60 * 1000, // 30 minutes - hole data rarely changes
@@ -89,14 +100,15 @@ export function useCourseHoles(courseId: string) {
 }
 
 /**
- * Hook to get course statistics and metadata
+ * Hook to get course statistics (included in getById)
  */
 export function useCourseStats(courseId: string) {
   return useQuery({
     queryKey: ['course', courseId, 'stats'],
     queryFn: async () => {
       const client = getTRPCClient();
-      return (client as any).course.getStatistics.query({ courseId });
+      const course = await client.course.getById.query({ id: courseId });
+      return course.statistics;
     },
     enabled: !!courseId,
     staleTime: 20 * 60 * 1000, // 20 minutes
@@ -106,46 +118,35 @@ export function useCourseStats(courseId: string) {
 }
 
 /**
- * Mutation hook to create a new course (admin/pro users)
+ * Hook to get available states for filtering
  */
-export function useCreateCourse() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (courseData: any) => {
+export function useCourseStates() {
+  return useQuery({
+    queryKey: ['course', 'states'],
+    queryFn: async () => {
       const client = getTRPCClient();
-      return (client as any).course.create.mutate(courseData);
+      return client.course.getStates.query();
     },
-    onSuccess: () => {
-      // Invalidate courses list to show new course
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
-    },
-    onError: (error: any) => {
-      console.error('Failed to create course:', error);
-    },
+    staleTime: 60 * 60 * 1000, // 1 hour - states don't change often
+    gcTime: 2 * 60 * 60 * 1000, // 2 hours
+    retry: 2,
   });
 }
 
 /**
- * Mutation hook to update course information
+ * Hook to get cities for a specific state
  */
-export function useUpdateCourse() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (variables: { id: string; data: any }) => {
+export function useCitiesForState(state: string) {
+  return useQuery({
+    queryKey: ['course', 'cities', state],
+    queryFn: async () => {
       const client = getTRPCClient();
-      return (client as any).course.update.mutate(variables);
+      return client.course.getCitiesByState.query({ state });
     },
-    onSuccess: (updatedCourse: any, variables: any) => {
-      // Update the specific course in cache
-      queryClient.setQueryData(['course', variables.id], updatedCourse);
-      // Invalidate course list to refresh
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
-    },
-    onError: (error: any) => {
-      console.error('Failed to update course:', error);
-    },
+    enabled: !!state && state.length === 2,
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
+    retry: 2,
   });
 }
 
@@ -161,7 +162,7 @@ export function usePrefetchCourse() {
         queryKey: ['course', courseId],
         queryFn: async () => {
           const client = getTRPCClient();
-          return (client as any).course.getById.query({ id: courseId });
+          return client.course.getById.query({ id: courseId });
         },
       });
     },
@@ -170,7 +171,8 @@ export function usePrefetchCourse() {
         queryKey: ['course', courseId, 'holes'],
         queryFn: async () => {
           const client = getTRPCClient();
-          return (client as any).course.getHoles.query({ courseId });
+          const course = await client.course.getById.query({ id: courseId });
+          return course.holes;
         },
       });
     },

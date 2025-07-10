@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { createLogger, logInfo, LogLevel } from '@repo/logger';
-import { loadConfigFromEnv, AppConfigSchema } from '@repo/config';
+// Removed unused config imports
 import { formatDate, calculateHandicapIndex, isValidEmail } from '@repo/utils';
 
 // Test logger functionality
@@ -49,6 +49,5 @@ export const TestUtilities: React.FC = () => {
   );
 };
 
-// Type check to ensure imports work
-const typeCheck: typeof logger = createLogger();
+// Removed unused typeCheck variable
 console.log('All imports working correctly!');

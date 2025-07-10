@@ -36,6 +36,21 @@ export function extractTokenFromHeader(authHeader?: string): string | null {
 }
 
 /**
+ * Generate JWT token for user
+ */
+export function generateJWT(payload: { userId: string; email: string }): string {
+  return jwt.sign(
+    {
+      userId: payload.userId,
+      email: payload.email,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
+    },
+    serverConfig.auth.jwtSecret
+  );
+}
+
+/**
  * Verify and decode JWT token
  */
 export function verifyJwtToken(token: string): JwtPayload {

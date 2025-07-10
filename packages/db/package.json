@@ -27,6 +27,7 @@
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
     "db:seed": "prisma db seed",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "clean": "rm -rf dist node_modules .turbo"
   },
@@ -42,6 +43,7 @@
     "tsx": "^4.19.4",
     "typescript": "^5.3.3",
     "vite": "^5.0.0",
-    "vite-plugin-dts": "^4.0.0"
+    "vite-plugin-dts": "^4.0.0",
+    "zod-prisma-types": "^3.2.4"
   }
 }

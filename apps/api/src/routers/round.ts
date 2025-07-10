@@ -1,10 +1,11 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from '../trpc.js';
 import { TRPCError } from '@trpc/server';
+import { RoundUncheckedUpdateInputSchema } from '@repo/db';
 
 // Input validation schemas
 const CreateRoundSchema = z.object({
-  courseId: z.string().uuid('Invalid course ID'),
+  courseId: z.string().min(1, 'Course ID is required'),
   startTime: z
     .date()
     .optional()
@@ -13,20 +14,19 @@ const CreateRoundSchema = z.object({
   temperature: z.number().int().min(-50).max(150).optional(),
   windSpeed: z.number().int().min(0).max(100).optional(),
   windDirection: z.enum(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']).optional(),
+  notes: z.string().max(500).optional(),
 });
 
-const UpdateRoundSchema = z.object({
-  id: z.string().uuid('Invalid round ID'),
-  endTime: z.date().optional(),
-  weather: z.string().max(100).optional(),
-  temperature: z.number().int().min(-50).max(150).optional(),
-  windSpeed: z.number().int().min(0).max(100).optional(),
-  windDirection: z.enum(['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']).optional(),
-  score: z.number().int().min(18).max(200).optional(),
-});
+// Use generated schema with ID field for our API  
+const UpdateRoundSchema = z.intersection(
+  z.object({
+    id: z.string().min(1, 'Round ID is required'),
+  }),
+  RoundUncheckedUpdateInputSchema
+);
 
 const GetRoundsSchema = z.object({
-  courseId: z.string().uuid().optional(),
+  courseId: z.string().min(1).optional(),
   startDate: z.date().optional(),
   endDate: z.date().optional(),
   limit: z.number().min(1).max(50).default(20),
@@ -34,7 +34,7 @@ const GetRoundsSchema = z.object({
 });
 
 const RoundStatsSchema = z.object({
-  id: z.string().uuid('Invalid round ID'),
+  id: z.string().min(1, 'Round ID is required'),
 });
 
 // Type exports for client consumption
@@ -102,6 +102,7 @@ export const roundRouter = router({
         ...(input.temperature !== undefined && { temperature: input.temperature }),
         ...(input.windSpeed !== undefined && { windSpeed: input.windSpeed }),
         ...(input.windDirection !== undefined && { windDirection: input.windDirection }),
+        ...(input.notes !== undefined && { notes: input.notes }),
       };
 
       // Create the round
@@ -194,7 +195,7 @@ export const roundRouter = router({
 
   // Get detailed round information with shots and statistics
   getById: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
       try {
         const round = await ctx.prisma.round.findUnique({
@@ -211,6 +212,17 @@ export const roundRouter = router({
                 state: true,
                 rating: true,
                 slope: true,
+                holes: {
+                  select: {
+                    id: true,
+                    holeNumber: true,
+                    par: true,
+                    yardage: true,
+                  },
+                  orderBy: {
+                    holeNumber: 'asc',
+                  },
+                },
               },
             },
             shots: {
@@ -309,7 +321,7 @@ export const roundRouter = router({
 
   // Delete round and all associated shots
   delete: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       try {
         // Verify round exists and belongs to user

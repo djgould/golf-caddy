@@ -40,6 +40,14 @@ const SHOT_OUTCOMES = [
   { id: 'penalty', name: 'Penalty', color: 'text-red-600' },
 ];
 
+const CLUB_OPTIONS = [
+  { category: 'Driver & Woods', clubs: ['Driver', '3W', '5W', '7W'] },
+  { category: 'Hybrids', clubs: ['1H', '2H', '3H', '4H', '5H'] },
+  { category: 'Irons', clubs: ['3I', '4I', '5I', '6I', '7I', '8I', '9I'] },
+  { category: 'Wedges', clubs: ['PW', 'GW', 'SW', 'LW'] },
+  { category: 'Putter', clubs: ['Putter'] },
+];
+
 export const ShotTracker: React.FC<ShotTrackerProps> = ({
   holeNumber,
   par,
@@ -105,13 +113,43 @@ export const ShotTracker: React.FC<ShotTrackerProps> = ({
         <View className="bg-gray-50 rounded-lg p-4 mb-4">
           <Text className="text-sm font-semibold text-gray-700 mb-2">New Shot</Text>
 
-          {/* Club Input */}
-          <TextInput
-            value={newShot.clubUsed || ''}
-            onChangeText={(text) => setNewShot({ ...newShot, clubUsed: text })}
-            placeholder="Club used (e.g., 7I, Driver)"
-            className="bg-white border border-gray-300 rounded-lg px-3 py-2 mb-3"
-          />
+          {/* Club Selection */}
+          <Text className="text-xs text-gray-600 mb-1">Club</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-3">
+            <View className="flex-row gap-2">
+              {CLUB_OPTIONS.map((category) =>
+                category.clubs.map((club) => (
+                  <TouchableOpacity
+                    key={club}
+                    onPress={() => setNewShot({ ...newShot, clubUsed: club })}
+                    className={`px-3 py-2 rounded-lg border-2 ${
+                      newShot.clubUsed === club
+                        ? 'bg-blue-100 border-blue-500'
+                        : 'bg-white border-gray-200'
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm ${
+                        newShot.clubUsed === club ? 'text-blue-700 font-medium' : 'text-gray-700'
+                      }`}
+                    >
+                      {club}
+                    </Text>
+                  </TouchableOpacity>
+                ))
+              )}
+            </View>
+          </ScrollView>
+          
+          {/* Custom Club Input (fallback) */}
+          {!newShot.clubUsed && (
+            <TextInput
+              value={newShot.clubUsed || ''}
+              onChangeText={(text) => setNewShot({ ...newShot, clubUsed: text })}
+              placeholder="Or type custom club (e.g., 60°)"
+              className="bg-white border border-gray-300 rounded-lg px-3 py-2 mb-3"
+            />
+          )}
 
           {/* Shot Type */}
           <Text className="text-xs text-gray-600 mb-1">Shot Type</Text>

@@ -1,9 +1,11 @@
 // Integration test demonstrating cross-package dependencies
 import { createLogger, logInfo, logError } from '@repo/logger';
 import { formatDate, getRelativeTime, formatDuration } from '@repo/utils';
-import { ConfigLoader, AppConfigSchema, type AppConfig } from '@repo/config';
+import { ConfigLoader, AppConfigSchema } from '@repo/config';
+import type { AppConfig } from '@repo/config';
 // import { prismaClient } from '@repo/db'; // Not yet exported
-import { getBuildOptions, type BuildEnvironment } from '@repo/build-config';
+import { getBuildOptions } from '@repo/build-config';
+import type { BuildEnvironment } from '@repo/build-config';
 import { createTestUser, userFixtures } from '@repo/test-config';
 
 // Test 1: Logger functionality
@@ -46,7 +48,7 @@ try {
 
   const configLoader = new ConfigLoader(AppConfigSchema);
   const validatedConfig = configLoader.load(mockConfig);
-  console.log('Config validation passed:', validatedConfig.appName);
+  console.log('Config validation passed:', validatedConfig?.appName);
 } catch (error) {
   logError(error as Error, { feature: 'config-validation' });
 }
@@ -84,22 +86,7 @@ type TestType = {
   config: AppConfig;
 };
 
-const typeTest: TestType = {
-  logger,
-  date: formatDate(new Date()),
-  config: {
-    environment: 'development',
-    appName: 'test',
-    version: '1.0.0',
-    logLevel: 'info',
-    features: {
-      enableOfflineMode: true,
-      enableAIAssistant: true,
-      enableSocialFeatures: false,
-      enablePremiumFeatures: false,
-    },
-  },
-};
+// Removed unused typeTest variable to fix TypeScript warning
 
 console.log('\nTypeScript type checking passed ✓');
 console.log('\nIntegration test completed successfully! 🎉');

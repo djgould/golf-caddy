@@ -2,8 +2,19 @@
   "name": "@repo/api",
   "version": "1.0.0",
   "description": "Golf Caddy tRPC API Server",
-  "main": "dist/server.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    }
+  },
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "vite build",

@@ -6,6 +6,16 @@ generator client {
   previewFeatures = ["postgresqlExtensions"]
 }
 
+generator zod {
+  provider                = "zod-prisma-types"
+  output                  = "../src/generated/zod"
+  writeNullishInModelTypes = true
+  createInputTypes        = true
+  createModelTypes        = true
+  addInputTypeValidation  = true
+  coerceDate             = true
+}
+
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
@@ -23,8 +33,9 @@ model User {
   updatedAt    DateTime @updatedAt
 
   // Relations
-  rounds Round[]
-  shots  Shot[]
+  rounds     Round[]
+  shots      Shot[]
+  holeScores HoleScore[]
 
   @@map("users")
 }
@@ -68,8 +79,9 @@ model Hole {
   description   String?
 
   // Relations
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  shots  Shot[]
+  course     Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  shots      Shot[]
+  holeScores HoleScore[]
 
   @@unique([courseId, holeNumber])
   @@map("holes")
@@ -91,9 +103,10 @@ model Round {
   updatedAt     DateTime  @updatedAt
 
   // Relations
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course Course @relation(fields: [courseId], references: [id])
-  shots  Shot[]
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course      @relation(fields: [courseId], references: [id])
+  shots      Shot[]
+  holeScores HoleScore[]
 
   @@index([userId, startTime])
   @@map("rounds")
@@ -121,4 +134,28 @@ model Shot {
 
   @@index([roundId, holeId, shotNumber])
   @@map("shots")
+}
+
+// Individual hole scores within a round
+model HoleScore {
+  id       String @id @default(cuid())
+  roundId  String
+  holeId   String
+  userId   String
+  score    Int // Actual strokes taken on this hole
+  putts    Int? // Number of putts (optional)
+  fairway  Boolean? // Hit fairway on tee shot (for par 4/5)
+  gir      Boolean? // Green in regulation
+  notes    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  round Round @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  hole  Hole  @relation(fields: [holeId], references: [id])
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roundId, holeId]) // One score per hole per round
+  @@index([roundId])
+  @@map("hole_scores")
 }

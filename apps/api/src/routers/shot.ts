@@ -56,8 +56,8 @@ const LocationSchema = z.object({
 
 // Input validation schemas
 const CreateShotSchema = z.object({
-  roundId: z.string().uuid('Invalid round ID'),
-  holeId: z.string().uuid('Invalid hole ID'),
+  roundId: z.string().min(1, 'Round ID is required'),
+  holeId: z.string().min(1, 'Hole ID is required'),
   shotNumber: z.number().int().min(1).max(20),
   club: GolfClubSchema,
   distance: z.number().min(0).max(500).optional(),
@@ -68,7 +68,7 @@ const CreateShotSchema = z.object({
 });
 
 const CreateBatchShotsSchema = z.object({
-  roundId: z.string().uuid('Invalid round ID'),
+  roundId: z.string().min(1, 'Round ID is required'),
   shots: z
     .array(CreateShotSchema.omit({ roundId: true }))
     .min(1)
@@ -76,7 +76,7 @@ const CreateBatchShotsSchema = z.object({
 });
 
 const UpdateShotSchema = z.object({
-  id: z.string().uuid('Invalid shot ID'),
+  id: z.string().min(1, 'Shot ID is required'),
   club: GolfClubSchema.optional(),
   distance: z.number().min(0).max(500).optional(),
   startLocation: LocationSchema.optional(),
@@ -86,8 +86,8 @@ const UpdateShotSchema = z.object({
 });
 
 const GetShotsSchema = z.object({
-  roundId: z.string().uuid().optional(),
-  holeId: z.string().uuid().optional(),
+  roundId: z.string().min(1).optional(),
+  holeId: z.string().min(1).optional(),
   club: GolfClubSchema.optional(),
   result: ShotResultSchema.optional(),
   limit: z.number().min(1).max(100).default(50),
@@ -95,8 +95,8 @@ const GetShotsSchema = z.object({
 });
 
 const ShotStatsSchema = z.object({
-  roundId: z.string().uuid().optional(),
-  holeId: z.string().uuid().optional(),
+  roundId: z.string().min(1).optional(),
+  holeId: z.string().min(1).optional(),
   club: GolfClubSchema.optional(),
 });
 
@@ -392,7 +392,7 @@ export const shotRouter = router({
 
   // Get shot by ID
   getById: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
       try {
         const shot = await ctx.prisma.shot.findUnique({
@@ -508,7 +508,7 @@ export const shotRouter = router({
 
   // Delete shot
   delete: protectedProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       try {
         // Verify shot exists and belongs to user

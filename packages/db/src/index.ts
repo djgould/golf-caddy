@@ -34,3 +34,19 @@ export type CreateShotInput = Omit<Shot, 'id' | 'createdAt'>;
 
 // Export spatial query helpers
 export * from './spatial-helpers';
+
+// Export generated Zod schemas (avoiding conflicts with Prisma types)
+export {
+  RoundUpdateInputSchema,
+  RoundUncheckedUpdateInputSchema,
+  RoundCreateInputSchema,
+  RoundUncheckedCreateInputSchema,
+  HoleScoreCreateInputSchema,
+  HoleScoreUncheckedCreateInputSchema,
+  HoleScoreUpdateInputSchema,
+  HoleScoreUncheckedUpdateInputSchema,
+  UserCreateInputSchema,
+  CourseCreateInputSchema,
+  ShotCreateInputSchema,
+  ShotUpdateInputSchema,
+} from './generated/zod';

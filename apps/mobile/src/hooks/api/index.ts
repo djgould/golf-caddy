@@ -12,23 +12,19 @@ export {
   useCoursesNearby,
   useCourseHoles,
   useCourseStats,
-  useCreateCourse,
-  useUpdateCourse,
+  useCourseStates,
+  useCitiesForState,
   usePrefetchCourse,
 } from './useCourses';
 
 // Round-related hooks
 export {
   useRounds,
-  useRound,
-  useRoundStats,
-  useRecentRounds,
+  useRoundById,
+  useRoundStatistics,
   useCreateRound,
   useUpdateRound,
   useDeleteRound,
-  useFinishRound,
-  useRoundsForCourse,
-  useOptimisticRoundUpdate,
   usePrefetchRound,
 } from './useRounds';
 
@@ -48,14 +44,33 @@ export {
   usePrefetchShots,
 } from './useShots';
 
+// Hole score related hooks
+export {
+  useHoleScores,
+  useHoleScore,
+  useUpsertHoleScore,
+  useUpdateHoleScore,
+  useDeleteHoleScore,
+  useRoundScoreStats,
+  useQuickScore,
+  usePrefetchHoleScores,
+} from './useHoleScores';
+
 // Re-export tRPC configuration and utilities
-export { AuthTokenManager, getTRPCErrorMessage, isTRPCError, TRPCConfig } from '../../config/trpc';
+export { 
+  AuthTokenManager, 
+  getTRPCErrorMessage, 
+  isTRPCError, 
+  TRPCConfig,
+  type CourseSearchOutput,
+  type RoundsOutput,
+  type CreateRoundInput,
+  type UpdateRoundInput 
+} from '../../config/trpc';
 
-// Re-export error handling
-export { TRPCErrorBoundary, useTRPCErrorHandler } from '../../components/errors/TRPCErrorBoundary';
-
-// Re-export provider
+// Re-export provider components
 export { TRPCProvider } from '../../components/providers/TRPCProvider';
+export { TRPCErrorBoundary, useTRPCErrorHandler } from '../../components/errors/TRPCErrorBoundary';
 
 /**
  * Common query options for different use cases

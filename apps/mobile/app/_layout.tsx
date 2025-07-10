@@ -8,11 +8,17 @@ import { ErrorBoundary } from '../components/ui/error';
 import { TRPCProvider, TRPCErrorBoundary } from '../src/hooks/api';
 import { globalErrorHandler } from '../src/services/error';
 import { useEffect } from 'react';
+// Import network test for debugging
+import '../src/utils/networkTest';
+import { initDevAuth } from '../src/services/devAuth';
 
 globalErrorHandler.initialize();
 
 export default function RootLayout() {
   useEffect(() => {
+    // Initialize development authentication
+    initDevAuth();
+    
     // Initialize any crash reporting service here
     // For example, if using Sentry:
     // errorLogger.initializeCrashReporter(Sentry.captureException);

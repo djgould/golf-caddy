@@ -108,11 +108,16 @@ export function useCreateShot() {
       return (client as any).shot.create.mutate(shotData);
     },
     onSuccess: (newShot: any, variables: any) => {
-      // Invalidate shots for the round
-      queryClient.invalidateQueries({ queryKey: ['shots', { roundId: variables.roundId }] });
+      // Invalidate all shots queries that match the pattern
+      queryClient.invalidateQueries({ queryKey: ['shots'] });
+      
+      // Specifically invalidate the hole-specific query
+      queryClient.invalidateQueries({ 
+        queryKey: ['shots', 'hole', variables.roundId, variables.holeId] 
+      });
 
-      // Invalidate round statistics (they may have changed)
-      queryClient.invalidateQueries({ queryKey: ['round', variables.roundId, 'stats'] });
+      // Invalidate round data (shot count may have changed)
+      queryClient.invalidateQueries({ queryKey: ['round', variables.roundId] });
 
       // Set the new shot in cache
       queryClient.setQueryData(['shot', newShot.id], newShot);
@@ -172,12 +177,11 @@ export function useUpdateShot() {
       // Update the specific shot in cache
       queryClient.setQueryData(['shot', variables.id], updatedShot);
 
-      // Invalidate shots for the round
-      queryClient.invalidateQueries({ queryKey: ['shots', { roundId: updatedShot.roundId }] });
+      // Invalidate all shots queries
+      queryClient.invalidateQueries({ queryKey: ['shots'] });
 
-      // Invalidate statistics (they may have changed)
-      queryClient.invalidateQueries({ queryKey: ['shots', 'stats'] });
-      queryClient.invalidateQueries({ queryKey: ['round', updatedShot.roundId, 'stats'] });
+      // Invalidate round data
+      queryClient.invalidateQueries({ queryKey: ['round', updatedShot.roundId] });
     },
     onError: (error: any) => {
       console.error('Failed to update shot:', error);
@@ -196,16 +200,15 @@ export function useDeleteShot() {
       const client = getTRPCClient();
       return (client as any).shot.delete.mutate(variables);
     },
-    onSuccess: (deletedShot: any, variables: any) => {
+    onSuccess: (result: any, variables: any) => {
       // Remove from cache
       queryClient.removeQueries({ queryKey: ['shot', variables.id] });
 
-      // Invalidate shots for the round
-      queryClient.invalidateQueries({ queryKey: ['shots', { roundId: deletedShot.roundId }] });
+      // Invalidate all shots queries
+      queryClient.invalidateQueries({ queryKey: ['shots'] });
 
-      // Invalidate statistics
-      queryClient.invalidateQueries({ queryKey: ['shots', 'stats'] });
-      queryClient.invalidateQueries({ queryKey: ['round', deletedShot.roundId, 'stats'] });
+      // Invalidate round data
+      queryClient.invalidateQueries({ queryKey: ['round'] });
     },
     onError: (error: any) => {
       console.error('Failed to delete shot:', error);

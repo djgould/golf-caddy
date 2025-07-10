@@ -1,0 +1,20 @@
+// Add this generator to your schema.prisma
+generator zod {
+  provider = "zod-prisma-types"
+  output   = "../src/generated/zod"
+  
+  // Optional configurations
+  createInputTypes = true
+  createModelTypes = true
+  createOptionalDefaultValuesTypes = true
+  createRelationValuesTypes = true
+  createPartialTypes = true
+}
+
+// Or use prisma-zod-generator
+generator zod {
+  provider = "prisma-zod-generator"
+  output   = "../src/generated/zod"
+  isGenerateSelect = true
+  isGenerateInclude = true
+}

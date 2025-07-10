@@ -14,9 +14,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { QueryClient } from '@tanstack/react-query';
 import Constants from 'expo-constants';
 
-// Note: We'll need to create an AppRouter type export from the API
-// For now, let's create a placeholder type that we'll replace once the API is properly typed
-export type AppRouter = any; // TODO: Import from @repo/api once properly exported
+// Import the actual AppRouter type from the API
+import type { AppRouter } from '@repo/api';
 
 // Environment configuration
 const getApiUrl = () => {
@@ -24,21 +23,48 @@ const getApiUrl = () => {
   const debuggerHost = Constants.expoConfig?.hostUri?.split(':')[0];
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
+  console.log('🔍 API URL Detection:');
+  console.log('  process.env.EXPO_PUBLIC_API_URL:', apiUrl);
+  console.log('  Constants.expoConfig?.hostUri:', Constants.expoConfig?.hostUri);
+  console.log('  debuggerHost:', debuggerHost);
+
+  // TEMPORARY FIX: Force correct URL until env vars refresh
+  if (apiUrl && apiUrl.includes('3001')) {
+    console.log('  🔧 TEMP FIX: Forcing port 3000 instead of 3001');
+    const correctedUrl = apiUrl.replace('3001', '3000');
+    return correctedUrl;
+  }
+
   if (apiUrl) {
+    // If environment variable is localhost but we have a debugger host, use that instead
+    if (apiUrl.includes('localhost') && debuggerHost && debuggerHost !== 'localhost') {
+      const port = apiUrl.split(':').pop();
+      const dynamicUrl = `http://${debuggerHost}:${port}`;
+      console.log('  🔄 Converting localhost to debugger host:', dynamicUrl);
+      return dynamicUrl;
+    }
     return apiUrl;
   }
 
   // Development default - use the debugger host IP
   if (__DEV__ && debuggerHost) {
-    return `http://${debuggerHost}:3001`;
+    return `http://${debuggerHost}:3000`;
   }
 
   // Fallback for development
-  return 'http://localhost:3001';
+  return 'http://localhost:3000';
 };
 
 export const API_URL = getApiUrl();
 export const TRPC_ENDPOINT = `${API_URL}/trpc`;
+
+// Debug logging in development
+if (__DEV__) {
+  console.log('🔧 tRPC Client Configuration:');
+  console.log('  API_URL:', API_URL);
+  console.log('  TRPC_ENDPOINT:', TRPC_ENDPOINT);
+  console.log('  Constants.expoConfig?.hostUri:', Constants.expoConfig?.hostUri);
+}
 
 // Authentication token management
 export class AuthTokenManager {
@@ -163,13 +189,14 @@ export function createQueryClient() {
 export type RouterInputs = inferRouterInputs<AppRouter>;
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-// Specific type helpers for common operations (will be refined once AppRouter is properly typed)
-export type CourseInput = any; // RouterInputs['course']['getCourses'];
-export type CourseOutput = any; // RouterOutputs['course']['getCourses'];
-export type RoundInput = any; // RouterInputs['round']['create'];
-export type RoundOutput = any; // RouterOutputs['round']['getById'];
-export type ShotInput = any; // RouterInputs['shot']['create'];
-export type ShotOutput = any; // RouterOutputs['shot']['getById'];
+// Specific type helpers for common operations
+export type CourseSearchInput = RouterInputs['course']['search'];
+export type CourseSearchOutput = RouterOutputs['course']['search'];
+export type CourseByIdOutput = RouterOutputs['course']['getById'];
+export type CreateRoundInput = RouterInputs['round']['create'];
+export type UpdateRoundInput = RouterInputs['round']['update'];
+export type RoundOutput = RouterOutputs['round']['getById'];
+export type RoundsOutput = RouterOutputs['round']['getRounds'];
 
 // Error handling utilities
 export function isTRPCError(

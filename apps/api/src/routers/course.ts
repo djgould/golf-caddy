@@ -27,8 +27,8 @@ const CourseSearchSchema = z.object({
 });
 
 const CourseDistanceSchema = z.object({
-  courseId1: z.string().uuid(),
-  courseId2: z.string().uuid(),
+  courseId1: z.string().min(1),
+  courseId2: z.string().min(1),
 });
 
 // Type for spatial query results - exported for use in AppRouter type
@@ -139,7 +139,7 @@ export const courseRouter = router({
 
   // Get detailed information about a specific course
   getById: publicProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(z.object({ id: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
       try {
         const course = await ctx.prisma.course.findUnique({
